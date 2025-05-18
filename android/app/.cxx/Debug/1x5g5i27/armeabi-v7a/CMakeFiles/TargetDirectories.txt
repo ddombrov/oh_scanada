@@ -1,0 +1,2 @@
+/home/pbertone/programming/School/Year3/mobile-comp/oh_scanada/android/app/.cxx/Debug/1x5g5i27/armeabi-v7a/CMakeFiles/edit_cache.dir
+/home/pbertone/programming/School/Year3/mobile-comp/oh_scanada/android/app/.cxx/Debug/1x5g5i27/armeabi-v7a/CMakeFiles/rebuild_cache.dir

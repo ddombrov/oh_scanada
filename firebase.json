@@ -1,0 +1,28 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "oh-scanada",
+          "appId": "1:509431177707:android:71a683ae2f6c76550179ae",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "oh-scanada",
+          "configurations": {
+            "android": "1:509431177707:android:71a683ae2f6c76550179ae",
+            "ios": "1:509431177707:ios:aa2a01b9b26b14740179ae",
+            "web": "1:509431177707:web:00172799528985a20179ae"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

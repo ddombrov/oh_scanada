@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "509431177707",
+    "project_id": "oh-scanada",
+    "storage_bucket": "oh-scanada.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:509431177707:android:71a683ae2f6c76550179ae",
+        "android_client_info": {
+          "package_name": "com.example.oh_scanada"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsJOeCSB2Edm5wkqWUfIrluBTQuQToIoc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
