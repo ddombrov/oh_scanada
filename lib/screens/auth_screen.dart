@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../colours/colour_system.dart';
+import '../utils/account_session.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
@@ -15,7 +16,7 @@ class AuthScreen extends StatelessWidget {
           ),
           SafeArea(
             child: Center(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -64,20 +65,6 @@ class AuthScreen extends StatelessWidget {
                         color: CanadianTheme.darkGrey,
                       ),
                     ),
-                    const SizedBox(height: 12),
-
-                    // Tagline
-                    Text(
-                      "Discover and support Canadian products",
-                      textAlign: TextAlign.center,
-                      style: CanadianTheme.canadianText(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        height: 1.3,
-                        color: CanadianTheme.darkGrey.withOpacity(0.7),
-                      ),
-                    ),
-
                     const SizedBox(height: 64),
 
                     // Login Button
@@ -131,6 +118,46 @@ class AuthScreen extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                             color: CanadianTheme.canadianRed,
                           ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Guest Button
+                    TextButton(
+                      onPressed: () {
+                        AccountSession.mode = AccountMode.guest;
+                        Navigator.pushReplacementNamed(context, '/home');
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: CanadianTheme.darkGrey,
+                      ),
+                      child: Text(
+                        "Continue as Guest",
+                        style: CanadianTheme.canadianText(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: CanadianTheme.darkGrey,
+                        ),
+                      ),
+                    ),
+
+                    // Example Account Button
+                    TextButton(
+                      onPressed: () {
+                        AccountSession.mode = AccountMode.example;
+                        Navigator.pushReplacementNamed(context, '/home');
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: CanadianTheme.darkGrey,
+                      ),
+                      child: Text(
+                        "Example Account",
+                        style: CanadianTheme.canadianText(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: CanadianTheme.darkGrey.withOpacity(0.7),
                         ),
                       ),
                     ),

@@ -13,7 +13,12 @@ class PostService {
 
   // user id getter
   String get currentUserId {
-    return _auth.currentUser?.uid ?? 'anonymous_user';
+    // Firebase Auth throws (rather than returning null) when it isn't configured.
+    try {
+      return _auth.currentUser?.uid ?? 'anonymous_user';
+    } catch (_) {
+      return 'anonymous_user';
+    }
   }
 
   // check if user liked a post
@@ -221,11 +226,15 @@ class PostService {
 
   // debug info
   void printCurrentUser() {
-    final user = _auth.currentUser;
-    print("=== auth user ===");
-    print("user: ${user?.uid ?? 'not signed in'}");
-    print("email: ${user?.email}");
-    print("name: ${user?.displayName}");
-    print("===============");
+    try {
+      final user = _auth.currentUser;
+      print("=== auth user ===");
+      print("user: ${user?.uid ?? 'not signed in'}");
+      print("email: ${user?.email}");
+      print("name: ${user?.displayName}");
+      print("===============");
+    } catch (e) {
+      print("auth unavailable: $e");
+    }
   }
 }

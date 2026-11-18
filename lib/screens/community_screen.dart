@@ -9,6 +9,7 @@ import '../colours/colour_system.dart';
 import '../services/post_service.dart';
 import '../services/rewards_service.dart';
 import '../utils/firestore_debug.dart';
+import '../utils/account_session.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -132,7 +133,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
   // load rewards
   Future<void> _fetchRewardsInfo() async {
     try {
-      final rewardInfo = await _rewardsService.getCurrentUserRewardInfo();
+      final Map<String, dynamic>? rewardInfo = AccountSession.isGuest
+          ? null
+          : AccountSession.isExample
+              ? ExampleAccount.rewardInfo
+              : await _rewardsService.getCurrentUserRewardInfo();
 
       if (rewardInfo != null) {
         setState(() {

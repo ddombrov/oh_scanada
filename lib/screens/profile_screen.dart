@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import '../widgets/screen_layout.dart';
 import '../colours/colour_system.dart';
 import '../services/auth_service.dart';
+import '../utils/account_session.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -80,6 +81,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadUserProfile() async {
+    if (AccountSession.isExample) {
+      setState(() {
+        _userName = ExampleAccount.name;
+        _userEmail = ExampleAccount.email;
+        _isLoading = false;
+      });
+      return;
+    }
+
+    if (AccountSession.isGuest) {
+      setState(() {
+        _userName = 'Guest';
+        _userEmail = 'Not signed in';
+        _isLoading = false;
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
     });
@@ -162,6 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _logout(BuildContext context) async {
+    AccountSession.mode = AccountMode.user;
     await _authService.signOut();
 
     // sign out directly from Firebase as a backup

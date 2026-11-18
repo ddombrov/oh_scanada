@@ -9,6 +9,7 @@ import '../services/post_service.dart';
 import '../services/rewards_service.dart';
 import '../screens/post_screen.dart';
 import '../utils/helpers.dart';
+import '../utils/account_session.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,6 +55,17 @@ class _HomeScreenState extends State<HomeScreen> {
   // Determine current theme
   bool get _isDarkMode => _themeProvider.isDarkMode;
 
+  List<Map<String, String>> get _recentScans {
+    switch (AccountSession.mode) {
+      case AccountMode.guest:
+        return const [];
+      case AccountMode.example:
+        return ExampleAccount.recentScans;
+      case AccountMode.user:
+        return ExampleAccount.recentScans.take(2).toList();
+    }
+  }
+
   Future<void> _fetchData() async {
     try {
       setState(() {
@@ -61,7 +73,11 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       // Fetch rewards information
-      final rewardInfo = await _rewardsService.getCurrentUserRewardInfo();
+      final Map<String, dynamic>? rewardInfo = AccountSession.isGuest
+          ? null
+          : AccountSession.isExample
+              ? ExampleAccount.rewardInfo
+              : await _rewardsService.getCurrentUserRewardInfo();
 
       if (rewardInfo != null) {
         setState(() {
@@ -153,46 +169,48 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: buildSection(
                           title: "Recent Scans",
                           icon: Icons.qr_code_scanner,
-                          child: Column(
-                            children: [
-                              ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0, vertical: 4.0),
-                                leading: Image.network(
-                                    'https://nwknitwear.com/cdn/shop/products/Hutchinson_sOrganicMapleSyrup_250ml_-MapleLeafbottle_534x700.png?v=1619637206',
-                                    width: 40,
-                                    height: 40),
-                                title: Text("Maple Syrup - Grade A",
+                          child: _recentScans.isEmpty
+                              ? Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    'No scans yet',
                                     style: CanadianTheme.canadianText(
                                       fontSize: 12,
                                       color: textColor,
-                                    )),
-                                subtitle: Text("Scanned on: March 20, 2025",
-                                    style: CanadianTheme.canadianText(
-                                      fontSize: 10,
-                                      color: secondaryTextColor,
-                                    )),
-                              ),
-                              ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0, vertical: 4.0),
-                                leading: Image.network(
-                                    'https://assets.shop.loblaws.ca/products/20134710/b2/en/front/20134710_front_a06_@2.png',
-                                    width: 40,
-                                    height: 40),
-                                title: Text("Canadian Cheddar Cheese",
-                                    style: CanadianTheme.canadianText(
-                                      fontSize: 12,
-                                      color: textColor,
-                                    )),
-                                subtitle: Text("Scanned on: March 18, 2025",
-                                    style: CanadianTheme.canadianText(
-                                      fontSize: 10,
-                                      color: secondaryTextColor,
-                                    )),
-                              ),
-                            ],
-                          ),
+                                    ),
+                                  ),
+                                )
+                              : Column(
+                                  children: _recentScans.map((scan) {
+                                    return ListTile(
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              horizontal: 8.0, vertical: 4.0),
+                                      leading: scan['image'] != null
+                                          ? Image.network(scan['image']!,
+                                              width: 40, height: 40)
+                                          : const SizedBox(
+                                              width: 40,
+                                              height: 40,
+                                              child: Icon(
+                                                  Icons.shopping_basket,
+                                                  color: CanadianTheme
+                                                      .canadianRed),
+                                            ),
+                                      title: Text(scan['name']!,
+                                          style: CanadianTheme.canadianText(
+                                            fontSize: 12,
+                                            color: textColor,
+                                          )),
+                                      subtitle: Text(
+                                          "Scanned on: ${scan['date']}",
+                                          style: CanadianTheme.canadianText(
+                                            fontSize: 10,
+                                            color: secondaryTextColor,
+                                          )),
+                                    );
+                                  }).toList(),
+                                ),
                         ),
                       ),
 

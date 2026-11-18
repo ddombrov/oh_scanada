@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/screen_layout.dart';
 import '../widgets/page_section.dart';
 import '../colours/colour_system.dart';
+import '../utils/account_session.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -13,8 +14,9 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   List<String> _searchResults = [];
-  List<String> _searchHistory = [];
-  bool _showHistory = false;
+  final List<String> _searchHistory =
+      AccountSession.isExample ? List.of(ExampleAccount.searchHistory) : [];
+  bool _showHistory = AccountSession.isExample;
   bool _isSearchingProducts = true;
   bool _showTrending = true;
 

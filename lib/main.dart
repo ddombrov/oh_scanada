@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -17,7 +18,7 @@ Future<void> main() async {
 
   try {
     print("Loading .env file...");
-    await dotenv.load(fileName: '.env');
+    await dotenv.load(fileName: '.env', isOptional: true);
     print(".env file loaded successfully");
   } catch (e) {
     print("Error loading .env file: ${e}");
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
+      builder: (context, child) => _DeviceFrame(child: child!),
       home: AuthScreen(),
       routes: {
         '/login': (context) => LoginScreen(),
@@ -58,6 +60,116 @@ class MyApp extends StatelessWidget {
         '/scanner': (context) => ScannerScreen(),
         '/search': (context) => SearchScreen(),
       },
+    );
+  }
+}
+
+// On wide (desktop) browsers, render the app inside a phone-sized viewport
+// so the mobile layouts aren't stretched across the whole window.
+class _DeviceFrame extends StatefulWidget {
+  const _DeviceFrame({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_DeviceFrame> createState() => _DeviceFrameState();
+}
+
+class _DeviceFrameState extends State<_DeviceFrame> {
+  static const Map<String, Size> _devices = {
+    'Small phone': Size(375, 667),
+    'Medium phone': Size(393, 852),
+    'Large phone': Size(430, 932),
+    'Tablet': Size(820, 1180),
+  };
+
+  String _device = 'Large phone';
+  bool _landscape = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final screen = mediaQuery.size;
+
+    if (screen.width <= _devices['Large phone']!.width + 64) {
+      return widget.child;
+    }
+
+    final portrait = _devices[_device]!;
+    final target = _landscape ? portrait.flipped : portrait;
+
+    // The app always lays out at the real device size; the whole frame is
+    // scaled down when the browser window is too small to show it 1:1.
+    final scale = math.min(
+      1.0,
+      math.min((screen.width - 48) / target.width,
+          (screen.height - 104) / target.height),
+    );
+
+    return ColoredBox(
+      color: const Color(0xFF2B2B2B),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Material(
+              type: MaterialType.transparency,
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  for (final name in _devices.keys)
+                    TextButton(
+                      onPressed: () => setState(() => _device = name),
+                      style: TextButton.styleFrom(
+                        foregroundColor: name == _device
+                            ? const Color(0xFFFF4D5E)
+                            : Colors.white70,
+                      ),
+                      child: Text(name),
+                    ),
+                  const SizedBox(width: 8),
+                  TextButton.icon(
+                    onPressed: () => setState(() => _landscape = !_landscape),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.white70,
+                      iconColor: Colors.white70,
+                    ),
+                    icon: const Icon(Icons.screen_rotation),
+                    label: Text(_landscape ? 'Portrait' : 'Landscape'),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: target.width * scale,
+              height: target.height * scale,
+              child: FittedBox(
+                child: Container(
+                  width: target.width,
+                  height: target.height,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(32),
+                    boxShadow: const [
+                      BoxShadow(color: Colors.black54, blurRadius: 30),
+                    ],
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: MediaQuery(
+                    data: mediaQuery.copyWith(
+                      size: target,
+                      padding: EdgeInsets.zero,
+                      viewPadding: EdgeInsets.zero,
+                    ),
+                    child: widget.child,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -7,10 +7,8 @@ import '../widgets/page_title.dart';
 import '../widgets/screen_layout.dart';
 import '../widgets/page_section.dart';
 import '../colours/colour_system.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart'; 
 import 'scanner_screen.dart'; 
 import 'package:firebase_auth/firebase_auth.dart'; 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final String upc;
@@ -129,76 +127,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       final brands = productData['brands'] ?? "";
       final categories = productData['categories'] ?? "";
 
-      // Create a comprehensive prompt
-      final promptContent = '''
-      Analyze this product: $name
-      UPC: ${widget.upc}
-      Ingredients: $ingredients
-      Brand: $brands
-      Categories: $categories
-      
-      Provide a brief analysis of this product focusing on:
-      1. Health benefits or concerns
-      2. Sustainability aspects
-      3. Key quality indicators
-      Keep it concise and consumer-friendly, 2-3 sentences.
-      ''';
-
-      final url = Uri.parse('https://api.openai.com/v1/chat/completions');
-      final apiKey = dotenv.env['OPENAI_API_KEY'];
-
-      if (apiKey == null || apiKey.isEmpty) {
-        throw Exception("API Key not found");
-      }
-
-      final response = await http.post(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $apiKey',
-        },
-        body: jsonEncode({
-          'model': 'gpt-3.5-turbo',
-          'messages': [
-            {
-              'role': 'system',
-              'content': 'You are a helpful product analysis assistant.'
-            },
-            {'role': 'user', 'content': promptContent}
-          ],
-          'temperature': 0.7,
-          'max_tokens': 150,
-        }),
-      );
+      final response = await _postAi({
+        'task': 'analysis',
+        'name': name,
+        'upc': widget.upc,
+        'ingredients': ingredients,
+        'brands': brands,
+        'categories': categories,
+      });
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final analysisText = data['choices'][0]['message']['content'];
 
         // Get sustainability rating with a separate call
-        final sustainabilityResponse = await http.post(
-          url,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $apiKey',
-          },
-          body: jsonEncode({
-            'model': 'gpt-3.5-turbo',
-            'messages': [
-              {
-                'role': 'system',
-                'content': 'You are a sustainability rating system.'
-              },
-              {
-                'role': 'user',
-                'content':
-                    'Rate the sustainability of $name with ingredients: $ingredients on a scale of 1.0 to 5.0. Return ONLY a number.'
-              }
-            ],
-            'temperature': 0.3,
-            'max_tokens': 10,
-          }),
-        );
+        final sustainabilityResponse = await _postAi({
+          'task': 'sustainability',
+          'name': name,
+          'ingredients': ingredients,
+        });
 
         if (sustainabilityResponse.statusCode == 200) {
           final sustainData = jsonDecode(sustainabilityResponse.body);
@@ -568,27 +515,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Future<String> fetchPhoneNumberFromChatGPT(String brand) async {
-    final apiKey = dotenv.env[
-        'OPENAI_API_KEY']; 
-    final url = Uri.parse("https://api.openai.com/v1/completions");
+  // The OpenAI key stays in the Worker, which builds each prompt from these fields.
+  Future<http.Response> _postAi(Map<String, dynamic> request) => http.post(
+        Uri.base.resolve('/api/ai'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(request),
+      );
 
-    final response = await http.post(
-      url,
-      headers: {
-        "Authorization": "Bearer $apiKey",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode({
-        "model": "text-davinci-003", 
-        "prompt": "What is the phone number for $brand?",
-        "max_tokens": 100,
-      }),
-    );
+  Future<String> fetchPhoneNumberFromChatGPT(String brand) async {
+    final response = await _postAi({'task': 'phone', 'brand': brand});
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return data['choices'][0]['text']
+      return data['choices'][0]['message']['content']
           .trim(); 
     } else {
       throw Exception('Failed to load phone number');

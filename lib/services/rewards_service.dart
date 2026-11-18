@@ -12,7 +12,12 @@ class RewardsService {
 
   // current user getter
   String get currentUserId {
-    return _auth.currentUser?.uid ?? 'anonymous_user';
+    // Firebase Auth throws (rather than returning null) when it isn't configured.
+    try {
+      return _auth.currentUser?.uid ?? 'anonymous_user';
+    } catch (_) {
+      return 'anonymous_user';
+    }
   }
 
   // fetch user rewards data
