@@ -1,0 +1,13 @@
+{
+  "name": "oh-scanada",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev --local --port 8788",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.162.0"
+  }
+}

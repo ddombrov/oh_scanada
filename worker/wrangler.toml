@@ -1,0 +1,18 @@
+name = "oh-scanada"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# The Flutter web build, served from the same address as the API so there is one link to share.
+[assets]
+directory = "../build/web"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+# Each visitor gets a few AI requests a minute, so the OpenAI key can't be drained through the app.
+[[ratelimits]]
+name = "AI_LIMIT"
+namespace_id = "1001"
+
+  [ratelimits.simple]
+  limit = 20
+  period = 60
