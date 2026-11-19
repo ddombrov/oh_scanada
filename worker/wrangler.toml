@@ -16,3 +16,8 @@ namespace_id = "1001"
   [ratelimits.simple]
   limit = 20
   period = 60
+
+# A site-wide count of AI requests per day, so the OpenAI key has a daily ceiling on top of its monthly cap.
+[[kv_namespaces]]
+binding = "SCANNER_USAGE"
+id = "905ff423317a4e4d969a2c8e8d7237a8"

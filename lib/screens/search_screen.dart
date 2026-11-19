@@ -127,6 +127,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   buildSection(
                     title: 'Recent Searches',
                     icon: Icons.history,
+                    image: 'lib/assets/icons/qr.png',
                     child: Column(
                       children: _searchHistory
                           .map((query) => ListTile(
@@ -145,6 +146,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   buildSection(
                     title: 'Recent Searches',
                     icon: Icons.history,
+                    image: 'lib/assets/icons/qr.png',
                     child: const Text('No recent searches'),
                   )
                 else if (_showTrending)

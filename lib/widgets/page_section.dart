@@ -6,6 +6,7 @@ Widget buildSection({
   required IconData icon,
   required Widget child,
   BuildContext? context,
+  String? image,
 }) {
   final themeProvider = ThemeProvider();
   final isDark = themeProvider.isDarkMode;
@@ -44,7 +45,9 @@ Widget buildSection({
           ),
           child: Row(
             children: [
-              Icon(icon, color: CanadianTheme.canadianRed, size: 18),
+              image != null
+                  ? Image.asset(image, width: 24, height: 24)
+                  : Icon(icon, color: CanadianTheme.canadianRed, size: 18),
               const SizedBox(width: 8.0),
               Text(
                 title,

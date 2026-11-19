@@ -523,6 +523,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildSection(
                           title: "Account Info",
                           icon: Icons.person,
+                          image: 'lib/assets/icons/moose.png',
                           child: _buildAccountInfo(
                               cardColour, textColour, secondaryTextColour),
                           isDark: isDark,
@@ -681,6 +682,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required bool isDark,
     required Color cardColour,
     required Color textColour,
+    String? image,
   }) {
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -700,7 +702,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, color: CanadianTheme.canadianRed, size: 22),
+              image != null
+                  ? Image.asset(image, width: 28, height: 28)
+                  : Icon(icon, color: CanadianTheme.canadianRed, size: 22),
               const SizedBox(width: 8.0),
               Text(
                 title,

@@ -18,7 +18,7 @@ A Flutter app that scans product barcodes and tells you whether a product is Can
 
 ## How the AI requests work
 
-The app never holds an OpenAI key. It sends the product's details to a small Cloudflare Worker (`worker/`). The Worker builds the prompt, calls OpenAI with a key stored as a Worker secret, and limits how many requests each visitor can make. The Worker also serves the web build, so the app and its API share one address.
+The app never holds an OpenAI key. It sends the product's details to a small Cloudflare Worker (`worker/`). The Worker builds the prompt, calls OpenAI with a key stored as a Worker secret, and limits each visitor to 20 requests a minute and the whole app to 300 a day. The Worker also serves the web build, so the app and its API share one address.
 
 ## Running it
 

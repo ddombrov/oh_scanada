@@ -16,6 +16,7 @@ Widget buildRewardsSection({
   return buildSection(
     title: "Your Rewards",
     icon: Icons.card_giftcard,
+    image: 'lib/assets/icons/maple-syrup.png',
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

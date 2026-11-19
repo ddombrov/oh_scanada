@@ -169,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: buildSection(
                           title: "Recent Scans",
                           icon: Icons.qr_code_scanner,
+                          image: 'lib/assets/icons/barcode.png',
                           child: _recentScans.isEmpty
                               ? Padding(
                                   padding: const EdgeInsets.all(8.0),
@@ -221,6 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: buildSection(
                           title: "Your Rewards",
                           icon: Icons.card_giftcard,
+                          image: 'lib/assets/icons/maple-syrup.png',
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -263,6 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: buildSection(
                           title: "Trending Community Posts",
                           icon: Icons.trending_up,
+                          image: 'lib/assets/icons/goose.png',
                           child: _loading
                               ? const Center(child: CircularProgressIndicator())
                               : _trendingPosts.isEmpty

@@ -39,7 +39,7 @@ class AuthScreen extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(15.0),
                         child: Image.asset(
-                          'lib/assets/Maple_Leaf.png',
+                          'lib/assets/icons/flag.png',
                           fit: BoxFit.contain,
                           errorBuilder: (context, error, stackTrace) {
                             print('Error loading image: $error');

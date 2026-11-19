@@ -1,6 +1,9 @@
 // Serves the app and answers its AI requests. The OpenAI key is a Worker secret and never reaches the browser.
 
 const MODEL = "gpt-4o-mini";
+// Every product page makes two AI requests (analysis and rating), so this allows about 150 product views a day.
+const DAILY_LIMIT = 300;
+const DAY_SECONDS = 24 * 60 * 60;
 
 const clip = (value, max) => String(value ?? "").slice(0, max);
 
@@ -60,6 +63,12 @@ export default {
     const body = await request.json().catch(() => null);
     const prompt = body && buildRequest(body);
     if (!prompt) return json({ error: "Unknown request." }, 400);
+
+    // KV counts are eventually consistent, so the cap can overshoot slightly under heavy load; that is fine here.
+    const dayKey = `day:${new Date().toISOString().slice(0, 10)}`;
+    const usedToday = Number(await env.SCANNER_USAGE.get(dayKey)) || 0;
+    if (usedToday >= DAILY_LIMIT) return json({ error: "The AI summary has reached today's limit. Try again tomorrow." }, 429);
+    await env.SCANNER_USAGE.put(dayKey, String(usedToday + 1), { expirationTtl: 2 * DAY_SECONDS });
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",

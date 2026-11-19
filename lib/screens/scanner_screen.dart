@@ -104,8 +104,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.no_photography,
-                        size: 48, color: CanadianTheme.darkGrey),
+                    Image.asset('lib/assets/icons/scanner.png', width: 96, height: 96),
                     const SizedBox(height: 12),
                     Text(
                       "Camera unavailable. You can enter the barcode number instead.",
@@ -172,7 +171,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                       backgroundColor: CanadianTheme.canadianRed,
                       foregroundColor: Colors.white,
                     ),
-                    icon: const Icon(Icons.keyboard),
+                    icon: Image.asset('lib/assets/icons/barcode.png', width: 24, height: 24),
                     label: const Text('Enter Barcode'),
                   ),
                 ],
