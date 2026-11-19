@@ -1,2 +1,15 @@
-# Enforce Unix newlines
-* text eol=lf
+# Unix newlines for text files. Git detects binary files itself, and the types below are always binary,
+# so line-ending conversion can never touch images, fonts or archives.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.jar binary
+*.zip binary
