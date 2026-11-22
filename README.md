@@ -14,7 +14,7 @@ A Flutter app that scans product barcodes and tells you whether a product is Can
 - **AI summary:** a short health and sustainability analysis, with a sustainability rating.
 - **Community and rewards:** posts, likes and a points-based rewards track.
 - **Try it without an account:** continue as a guest, or open the example account, which comes with scan history and rewards.
-- **Device preview on the web:** the web build shows the app in a phone or tablet frame, with small, medium and large phone sizes and a landscape toggle.
+- **Device preview on the web:** the web build shows the app in a phone or tablet frame, with small, medium and large phone sizes and a landscape toggle in a column beside the frame.
 
 ## How the AI requests work
 

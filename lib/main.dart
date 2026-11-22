@@ -91,7 +91,7 @@ class _DeviceFrameState extends State<_DeviceFrame> {
     final mediaQuery = MediaQuery.of(context);
     final screen = mediaQuery.size;
 
-    if (screen.width <= _devices['Large phone']!.width + 64) {
+    if (screen.width <= _devices['Large phone']!.width + 250) {
       return widget.child;
     }
 
@@ -100,48 +100,21 @@ class _DeviceFrameState extends State<_DeviceFrame> {
 
     // The app always lays out at the real device size; the whole frame is
     // scaled down when the browser window is too small to show it 1:1.
+    // The device choices sit in a column to the right of the frame rather
+    // than above it, so the frame gets the window's full height.
+    const sideWidth = 170.0;
     final scale = math.min(
       1.0,
-      math.min((screen.width - 48) / target.width,
-          (screen.height - 104) / target.height),
+      math.min((screen.width - 48 - sideWidth) / target.width,
+          (screen.height - 32) / target.height),
     );
 
     return ColoredBox(
       color: const Color(0xFF2B2B2B),
       child: Center(
-        child: Column(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Material(
-              type: MaterialType.transparency,
-              child: Wrap(
-                alignment: WrapAlignment.center,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  for (final name in _devices.keys)
-                    TextButton(
-                      onPressed: () => setState(() => _device = name),
-                      style: TextButton.styleFrom(
-                        foregroundColor: name == _device
-                            ? const Color(0xFFFF4D5E)
-                            : Colors.white70,
-                      ),
-                      child: Text(name),
-                    ),
-                  const SizedBox(width: 8),
-                  TextButton.icon(
-                    onPressed: () => setState(() => _landscape = !_landscape),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white70,
-                      iconColor: Colors.white70,
-                    ),
-                    icon: const Icon(Icons.screen_rotation),
-                    label: Text(_landscape ? 'Portrait' : 'Landscape'),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
             SizedBox(
               width: target.width * scale,
               height: target.height * scale,
@@ -164,6 +137,39 @@ class _DeviceFrameState extends State<_DeviceFrame> {
                     ),
                     child: widget.child,
                   ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            SizedBox(
+              width: sideWidth,
+              child: Material(
+                type: MaterialType.transparency,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final name in _devices.keys)
+                      TextButton(
+                        onPressed: () => setState(() => _device = name),
+                        style: TextButton.styleFrom(
+                          foregroundColor: name == _device
+                              ? const Color(0xFFFF4D5E)
+                              : Colors.white70,
+                        ),
+                        child: Text(name),
+                      ),
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: () => setState(() => _landscape = !_landscape),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white70,
+                        iconColor: Colors.white70,
+                      ),
+                      icon: const Icon(Icons.screen_rotation),
+                      label: Text(_landscape ? 'Portrait' : 'Landscape'),
+                    ),
+                  ],
                 ),
               ),
             ),
