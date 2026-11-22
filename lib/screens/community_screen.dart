@@ -46,7 +46,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
   void initState() {
     super.initState();
     _themeProvider.addListener(_themeListener);
-    _postService.printCurrentUser();
     _fetchRewardsInfo();
     _loadPosts();
 

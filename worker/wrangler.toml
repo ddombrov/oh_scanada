@@ -21,3 +21,18 @@ namespace_id = "1001"
 [[kv_namespaces]]
 binding = "SCANNER_USAGE"
 id = "905ff423317a4e4d969a2c8e8d7237a8"
+
+# The community board's posts, comments and likes. Local development uses a database in the .wrangler folder.
+[[d1_databases]]
+binding = "COMMUNITY"
+database_name = "oh-scanada-community"
+database_id = "dc770605-d654-40fa-bc97-7f9ad55635ff"
+
+# Each visitor can make a few community changes a minute.
+[[ratelimits]]
+name = "COMMUNITY_LIMIT"
+namespace_id = "1002"
+
+  [ratelimits.simple]
+  limit = 15
+  period = 60

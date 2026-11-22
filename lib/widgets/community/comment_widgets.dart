@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/helpers.dart';
 import '../page_section.dart';
 import '../../colours/colour_system.dart';
@@ -186,8 +185,8 @@ Widget _buildCommentItem({
   final isLiked = comment['is_liked'] ?? false;
 
   // timestamp handling
-  final commentTimestamp = comment['createdAt'] is Timestamp
-      ? (comment['createdAt'] as Timestamp).toDate()
+  final commentTimestamp = comment['createdAt'] is DateTime
+      ? comment['createdAt'] as DateTime
       : DateTime.now();
 
   return Column(

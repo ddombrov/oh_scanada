@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/post_service.dart';
 import '../services/comment_service.dart';
 import '../widgets/screen_layout.dart';
@@ -52,38 +51,13 @@ class _PostScreenState extends State<PostScreen> {
     try {
       setState(() => _isLoading = true);
 
-      // get username
-      if (widget.post['post_owner'] is DocumentReference) {
-        final userData =
-            await _postService.getUserFromReference(widget.post['post_owner']);
-        if (userData != null) {
-          setState(() => _username =
-              userData['name'] ?? userData['username'] ?? 'Unknown User');
-        }
-      } else if (widget.post['username'] is String) {
+      if (widget.post['username'] is String) {
         setState(() => _username = widget.post['username']);
       }
 
-      // get comments for post
-      DocumentReference postRef =
-          FirebaseFirestore.instance.collection('posts').doc(widget.post['id']);
-      final comments =
-          await _commentService.getCommentsForPostWithLikeStatus(postRef);
-
-      // add usernames to comments
-      final enrichedComments = await Future.wait(comments.map((comment) async {
-        final enrichedComment = Map<String, dynamic>.from(comment);
-        if (comment['comment_owner'] is DocumentReference) {
-          final userData =
-              await _postService.getUserFromReference(comment['comment_owner']);
-          enrichedComment['username'] =
-              userData?['name'] ?? userData?['username'] ?? 'Unknown User';
-        }
-        return enrichedComment;
-      }));
-
+      final comments = await _commentService.getCommentsForPost(widget.post['id']);
       setState(() {
-        _comments = enrichedComments;
+        _comments = comments;
         _isLoading = false;
       });
     } catch (e) {
@@ -151,10 +125,8 @@ class _PostScreenState extends State<PostScreen> {
     if (_commentController.text.trim().isEmpty) return;
 
     try {
-      DocumentReference postRef =
-          FirebaseFirestore.instance.collection('posts').doc(widget.post['id']);
       await _commentService.addComment(
-          content: _commentController.text.trim(), postRef: postRef);
+          content: _commentController.text.trim(), postId: widget.post['id']);
       _commentController.clear();
       _fetchUserAndComments();
       setState(() => _post['comments'] = (_post['comments'] ?? 0) + 1);

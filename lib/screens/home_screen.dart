@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/screen_layout.dart';
 import '../widgets/page_section.dart';
 import '../widgets/page_title.dart';
@@ -108,21 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
       posts.sort((a, b) => (b['likes'] ?? 0).compareTo(a['likes'] ?? 0));
 
       // Take top 2 posts
-      final List<Map<String, dynamic>> enrichedPosts = [];
-      for (var post in posts.take(2)) {
-        // Fetch user details for the post
-        if (post['post_owner'] is DocumentReference) {
-          final userData =
-              await _postService.getUserFromReference(post['post_owner']);
-
-          // Create a new map with additional user info
-          final enrichedPost = Map<String, dynamic>.from(post);
-          enrichedPost['username'] =
-              userData?['name'] ?? userData?['username'] ?? 'Unknown User';
-
-          enrichedPosts.add(enrichedPost);
-        }
-      }
+      final enrichedPosts = posts.take(2).toList();
 
       if (mounted) {
         setState(() {
@@ -283,12 +268,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                           CrossAxisAlignment.start,
                                       children: _trendingPosts.map((post) {
                                         // Handle timestamp
-                                        DateTime? timestamp;
-                                        if (post['createdAt'] is Timestamp) {
-                                          timestamp =
-                                              (post['createdAt'] as Timestamp)
-                                                  .toDate();
-                                        }
+                                        final DateTime? timestamp =
+                                            post['createdAt'] is DateTime
+                                                ? post['createdAt'] as DateTime
+                                                : null;
                                         final timeAgo = timestamp != null
                                             ? Helpers.formatRelativeTime(
                                                 timestamp)

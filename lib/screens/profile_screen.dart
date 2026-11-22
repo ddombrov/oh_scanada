@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import '../widgets/screen_layout.dart';
 import '../colours/colour_system.dart';
 import '../services/auth_service.dart';
+import '../services/community_api.dart';
 import '../utils/account_session.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -82,8 +83,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _loadUserProfile() async {
     if (AccountSession.isExample) {
+      final name = await CommunityApi.name();
       setState(() {
-        _userName = ExampleAccount.name;
+        _userName = name;
         _userEmail = ExampleAccount.email;
         _isLoading = false;
       });
@@ -91,8 +93,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     if (AccountSession.isGuest) {
+      final name = await CommunityApi.name();
       setState(() {
-        _userName = 'Guest';
+        _userName = name;
         _userEmail = 'Not signed in';
         _isLoading = false;
       });
@@ -165,19 +168,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return;
       }
 
-      // If still no data, set default values
-      setState(() {
-        _userName = 'Guest';
-        _userEmail = 'Not signed in';
-        _isLoading = false;
-      });
+      // No account (or Firebase isn't set up here): show the name used on the community board.
+      await _showWithoutAccount();
     } catch (e) {
-      setState(() {
-        _userName = 'Error loading profile';
-        _userEmail = 'Please try again';
-        _isLoading = false;
-      });
+      await _showWithoutAccount();
     }
+  }
+
+  Future<void> _showWithoutAccount() async {
+    final name = await CommunityApi.name();
+    if (!mounted) return;
+    setState(() {
+      _userName = name;
+      _userEmail = 'Not signed in';
+      _isLoading = false;
+    });
   }
 
   void _logout(BuildContext context) async {
@@ -321,6 +326,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  bool get _signedIn => !AccountSession.isGuest && !AccountSession.isExample && _userEmail != 'Not signed in';
+
   void _editField(String field) {
     final TextEditingController controller = TextEditingController();
 
@@ -373,7 +380,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 // Update based on field type
                 bool updateSuccess = false;
 
-                if (field == 'Name') {
+                if (field == 'Name' && !_signedIn) {
+                  await CommunityApi.setName(newValue);
+                  setState(() => _userName = newValue.trim());
+                  updateSuccess = true;
+                } else if (field == 'Name') {
+                  await CommunityApi.setName(newValue);
 
                   // Update through service first
                   updateSuccess =
@@ -730,10 +742,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildInfoRow('Name', _userName, () => _editField('Name'), textColour,
             secondaryTextColour),
         const Divider(height: 24.0),
-        _buildInfoRow('Email', _userEmail, () => _editField('Email'),
+        // Email and password belong to a signed-in account, so a guest or the example account can't change them.
+        _buildInfoRow('Email', _userEmail, _signedIn ? () => _editField('Email') : null,
             textColour, secondaryTextColour),
         const Divider(height: 24.0),
-        _buildInfoRow('Password', '••••••••', () => _editField('Password'),
+        _buildInfoRow('Password', '••••••••', _signedIn ? () => _editField('Password') : null,
             textColour, secondaryTextColour),
       ],
     );

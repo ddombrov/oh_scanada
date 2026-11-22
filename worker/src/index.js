@@ -1,4 +1,5 @@
-// Serves the app and answers its AI requests. The OpenAI key is a Worker secret and never reaches the browser.
+// Serves the app, answers its AI requests and runs the community board. The OpenAI key is a Worker secret and never reaches the browser.
+import { community } from "./community.js";
 
 const MODEL = "gpt-4o-mini";
 // Every product page makes two AI requests (analysis and rating), so this allows about 150 product views a day.
@@ -54,6 +55,8 @@ const json = (data, status = 200) =>
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const board = await community(request, env, url);
+    if (board) return board;
     if (url.pathname !== "/api/ai") return env.ASSETS.fetch(request);
     if (request.method !== "POST") return json({ error: "Use POST." }, 405);
 

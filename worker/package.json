@@ -4,8 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "db:local": "wrangler d1 execute oh-scanada-community --local --file=schema.sql",
     "dev": "wrangler dev --local --port 8788",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "db:remote": "wrangler d1 execute oh-scanada-community --remote --file=schema.sql"
   },
   "devDependencies": {
     "wrangler": "^4.162.0"

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../screens/post_screen.dart';
 import '../../services/post_service.dart';
 import 'post_widgets.dart';
@@ -69,39 +68,19 @@ Widget _buildPostContent({
     crossAxisAlignment: CrossAxisAlignment.start,
     children: List.generate(posts.length, (index) {
       final post = posts[index];
-
-      // get user ref
-      DocumentReference? userRef;
-      if (post['post_owner'] is DocumentReference) {
-        userRef = post['post_owner'] as DocumentReference;
-      }
-
-      if (userRef == null) return SizedBox.shrink();
-
-      return FutureBuilder<Map<String, dynamic>?>(
-        future: postService.getUserFromReference(userRef),
-        builder: (context, userSnapshot) {
-          String username = userSnapshot.hasData
-              ? userSnapshot.data!['name'] ?? 'unknown'
-              : userSnapshot.hasError
-                  ? 'unknown user'
-                  : 'loading...';
-
-          return buildPostItem(
-            context: context,
-            post: post,
-            username: username,
-            isUserPost: isUserPosts,
-            showDivider: index < posts.length - 1,
-            cardColor: cardColor,
-            textColor: textColor,
-            secondaryTextColor: secondaryTextColor,
-            postService: postService,
-            refreshPosts: refreshPosts,
-            updatePost: updatePost,
-          );
-        },
-      );
+      return Builder(builder: (context) => buildPostItem(
+        context: context,
+        post: post,
+        username: post['username']?.toString() ?? 'Guest',
+        isUserPost: isUserPosts,
+        showDivider: index < posts.length - 1,
+        cardColor: cardColor,
+        textColor: textColor,
+        secondaryTextColor: secondaryTextColor,
+        postService: postService,
+        refreshPosts: refreshPosts,
+        updatePost: updatePost,
+      ));
     }),
   );
 }
@@ -123,11 +102,7 @@ Widget buildPostItem({
   final postId = post['id'] as String;
 
   // check if this is user's own post
-  bool isCurrentUserPost = false;
-  if (post['post_owner'] is DocumentReference) {
-    DocumentReference postOwnerRef = post['post_owner'] as DocumentReference;
-    isCurrentUserPost = postOwnerRef.id == postService.currentUserId;
-  }
+  final bool isCurrentUserPost = post['mine'] == true;
 
   // action handlers
   void navigateToPostDetail() {
