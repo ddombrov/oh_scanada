@@ -26,10 +26,10 @@ Requires Flutter.
 
 ```
 flutter pub get
-flutter build web --release --dart2js-optimization O2
+flutter build web --release
 ```
 
-The O2 setting matters: the most aggressive optimisation level breaks the camera in the browser.
+Keep the default optimisation level: with `--dart2js-optimization O2` the browser camera stays blank and never starts.
 
 To serve the build together with the AI endpoint, put `OPENAI_API_KEY=<your key>` in `worker/.dev.vars`, then:
 
