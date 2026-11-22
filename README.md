@@ -29,7 +29,7 @@ flutter pub get
 flutter build web --release
 ```
 
-Keep the default optimisation level: with `--dart2js-optimization O2` the browser camera stays blank and never starts.
+Keep the default optimisation level: with `--dart2js-optimization O2` the browser camera stays blank and never starts. Delete `build/web` before building after changing that setting, because Flutter can otherwise reuse the old compiled output.
 
 To serve the build together with the AI endpoint, put `OPENAI_API_KEY=<your key>` in `worker/.dev.vars`, then:
 
