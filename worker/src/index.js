@@ -1,7 +1,11 @@
 // Serves the app, answers its AI requests and runs the community board. The OpenAI key is a Worker secret and never reaches the browser.
 import { community } from "./community.js";
+import { reportAiFailure } from "./alerts.js";
 
-const MODEL = "gpt-4o-mini";
+// The models to try, cheapest first. A model that fails (retired, or an outage) is skipped for the next one, and the
+// failure is emailed through the alerts Worker. These models only accept the default temperature.
+// Each passed the three requests below on a real product before being listed.
+const MODELS = ["gpt-6-luna", "gpt-5.6-luna"];
 // Every product page makes two AI requests (analysis and rating), so this allows about 150 product views a day.
 const DAILY_LIMIT = 300;
 const DAY_SECONDS = 24 * 60 * 60;
@@ -27,21 +31,18 @@ Provide a brief analysis of this product focusing on:
 2. Sustainability aspects
 3. Key quality indicators
 Keep it concise and consumer-friendly, 2-3 sentences.`,
-        temperature: 0.7,
         max_tokens: 150,
       };
     case "sustainability":
       return {
         system: "You are a sustainability rating system.",
         user: `Rate the sustainability of ${name} with ingredients: ${ingredients} on a scale of 1.0 to 5.0. Return ONLY a number.`,
-        temperature: 0.3,
         max_tokens: 10,
       };
     case "phone":
       return {
         system: "You answer with a company's customer service phone number only.",
         user: `What is the phone number for ${clip(body.brand, 100)}?`,
-        temperature: 0,
         max_tokens: 100,
       };
     default:
@@ -53,7 +54,7 @@ const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const board = await community(request, env, url);
     if (board) return board;
@@ -73,23 +74,26 @@ export default {
     if (usedToday >= DAILY_LIMIT) return json({ error: "The AI summary has reached today's limit. Try again tomorrow." }, 429);
     await env.SCANNER_USAGE.put(dayKey, String(usedToday + 1), { expirationTtl: 2 * DAY_SECONDS });
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.OPENAI_API_KEY}` },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: prompt.system },
-          { role: "user", content: prompt.user },
-        ],
-        temperature: prompt.temperature,
-        max_tokens: prompt.max_tokens,
-      }),
-    });
-    if (!response.ok) {
-      console.error("OpenAI error", response.status, await response.text());
-      return json({ error: "The AI service is unavailable." }, 502);
+    for (let i = 0; i < MODELS.length; i++) {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.OPENAI_API_KEY}` },
+        body: JSON.stringify({
+          model: MODELS[i],
+          messages: [
+            { role: "system", content: prompt.system },
+            { role: "user", content: prompt.user },
+          ],
+          // These models think before answering, which would use up the small token limits; these short answers don't need it.
+          reasoning_effort: "none",
+          max_completion_tokens: prompt.max_tokens,
+        }),
+      });
+      if (response.ok) return json(await response.json());
+      const detail = await response.text();
+      console.error("OpenAI error", MODELS[i], response.status, detail);
+      ctx.waitUntil(reportAiFailure(env.ALERTS_TOKEN, "Oh Scanada scanner", MODELS[i], MODELS[i + 1] ?? "", `${response.status} ${detail}`));
     }
-    return json(await response.json());
+    return json({ error: "The AI service is unavailable." }, 502);
   },
 };
